@@ -1,0 +1,215 @@
+@import 'tailwindcss';
+
+/*
+ * Palette sampled from the hero film: plum-black backdrop, the magenta
+ * backlight glow, bone-white type. Display: General Sans (a flat, slightly
+ * wide neo-grotesk). Utility voice: Geist Mono.
+ */
+@theme {
+  --color-night: #0c0710;
+  --color-plum: #1c0f1d;
+  --color-bloom: #e2358c;
+  --color-pear: #ff7cb8;
+  --color-lime: #b9d36a;
+  --color-bone: #f5f0ea;
+  --color-hair: rgb(245 240 234 / 0.16);
+
+  --font-display: 'General Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* The headline: one size for all three words. */
+  --text-mega: clamp(3.9rem, 10.2vw, 15rem);
+  --text-mega--line-height: 0.78;
+  --text-mega--letter-spacing: -0.012em;
+
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.35;
+  --text-micro--letter-spacing: 0.08em;
+
+  --text-tag: clamp(0.72rem, 0.2rem + 0.62vw, 0.9rem);
+  --text-tag--line-height: 1.32;
+  --text-tag--letter-spacing: 0.035em;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+@layer base {
+  html {
+    background: var(--color-night);
+    color: var(--color-bone);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    background: var(--color-night);
+    font-family: var(--font-display);
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-bloom);
+    color: var(--color-bone);
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* ---------- Headline: letters rise out of their own masks on load ---------- */
+
+.word {
+  display: inline-flex;
+  overflow: clip;
+  /* room for the descender-free caps plus the rise */
+  padding-block: 0.06em 0.02em;
+  margin-block: -0.06em -0.02em;
+}
+.word > span {
+  display: inline-block;
+  transform: translate3d(0, 108%, 0) rotate(4deg);
+  transform-origin: 0 100%;
+  animation: rise 1.25s var(--ease-out-expo) forwards;
+  animation-delay: calc(var(--d, 0) * 1ms + var(--i, 0) * 38ms);
+}
+@keyframes rise {
+  to {
+    transform: none;
+  }
+}
+
+/* ---------- Small mono copy fades up line by line ---------- */
+
+.line-in {
+  opacity: 0;
+  transform: translate3d(0, 0.9em, 0);
+  animation: line-in 0.9s var(--ease-glide) forwards;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes line-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Viewfinder corners ---------- */
+
+.corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: rgb(245 240 234 / 0.55);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0;
+  animation: line-in 1s var(--ease-glide) 900ms forwards;
+}
+
+/* ---------- Callouts ---------- */
+
+.callout {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.callout .lead {
+  stroke: rgb(245 240 234 / 0.85);
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.7s var(--ease-glide);
+}
+.callout .dot {
+  fill: var(--color-bone);
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+  transition: transform 0.4s var(--ease-out-expo);
+}
+.callout .tag {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  transition:
+    clip-path 0.65s var(--ease-out-expo) 0.35s,
+    opacity 0.2s linear 0.35s;
+}
+.callout .bracket {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 0 solid rgb(245 240 234 / 0.8);
+  opacity: 0;
+  transition:
+    opacity 0.3s linear 0.45s,
+    translate 0.6s var(--ease-out-expo) 0.45s;
+}
+.callout .b-tl { left: -9px; top: -9px; border-left-width: 1px; border-top-width: 1px; translate: 6px 6px; }
+.callout .b-tr { right: -9px; top: -9px; border-right-width: 1px; border-top-width: 1px; translate: -6px 6px; }
+.callout .b-bl { left: -9px; bottom: -9px; border-left-width: 1px; border-bottom-width: 1px; translate: 6px -6px; }
+.callout .b-br { right: -9px; bottom: -9px; border-right-width: 1px; border-bottom-width: 1px; translate: -6px -6px; }
+
+.callout[data-on='true'] .lead { stroke-dashoffset: 0; }
+.callout[data-on='true'] .dot { transform: scale(1); }
+.callout[data-on='true'] .tag { opacity: 1; clip-path: inset(0 0 0 0); }
+.callout[data-on='true'] .bracket { opacity: 1; translate: 0 0; }
+
+/* Leaving is quicker and all at once. */
+.callout[data-on='false'] .lead,
+.callout[data-on='false'] .tag,
+.callout[data-on='false'] .bracket,
+.callout[data-on='false'] .dot {
+  transition-duration: 0.25s;
+  transition-delay: 0s;
+}
+
+/* ---------- Film grain ---------- */
+
+.grain {
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-4%, 3%); }
+  40% { transform: translate(3%, -5%); }
+  60% { transform: translate(-2%, 6%); }
+  80% { transform: translate(5%, 2%); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word > span,
+  .line-in,
+  .corner {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+  .grain {
+    animation: none;
+  }
+}
